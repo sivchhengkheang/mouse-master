@@ -1,5 +1,5 @@
 export const en = {
-  app_title: "Mouse Master",
+  app_title: "Master Mouse",
   sidebar: {
     home: "Home",
     history: "History",
