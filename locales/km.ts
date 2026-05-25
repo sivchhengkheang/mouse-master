@@ -127,12 +127,12 @@ export const km = {
 
     // StarCatcher
     star_catcher: "ចាប់ផ្កាយ",
-    star_catcher_instruction: "អូសកន្រ្តកដើម្បីចាប់ផ្កាយ!",
+    star_catcher_instruction: "គូសប្រអប់ដើម្បីចាប់ផ្កាយ!",
     star_catcher_success: "ចាប់បានល្អ!",
 
     // ToySorter
-    toy_sorter: "តម្រៀបកុម្ភ",
-    toy_sorter_instruction: "អូសកុម្ភទៅប្រអប់ត្រូវ!",
+    toy_sorter: "ប្រមូលរបស់លេង",
+    toy_sorter_instruction: "អូសរបស់លេងទៅក្នុងប្រអប់!",
     toy_sorter_success: "ល្អឥតខ្ចោះ!",
     toy_sorter_box: "ប្រអប់",
 
@@ -143,12 +143,12 @@ export const km = {
 
     // NumberPop
     number_pop: "ផ្ទុះលេខ",
-    number_pop_instruction: "ចុចលើលេខត្រូវ!",
+    number_pop_instruction: "ចុចទៅលើលេខតាមលំដាប់!",
     number_pop_success: "ត្រូវហើយ!",
 
     // MagicalColors
     magical_colors: "ពណ៌អស្ចារ្យ",
-    magical_colors_instruction: "ចុចម៉ៅស្ដាំដើម្បីលាយពណ៌!",
+    magical_colors_instruction: "ចុចម៉ៅស្ដាំដើម្បីបើកពណ៌!",
     magical_colors_success: "ល្អឥតខ្ចោះ!",
 
     // TraceShape

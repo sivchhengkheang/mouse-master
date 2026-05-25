@@ -83,45 +83,35 @@ export const TraceShape: React.FC<{
     null,
   );
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMove = (clientX: number, clientY: number, isDragging: boolean) => {
+    if (!containerRef.current) return;
+    
     // 0. UPDATE VISUAL CURSOR (Always track, even if not clicking)
-    if (containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      // Calculate percentage position exactly matching the game logic's coordinate system
-      const px = ((e.clientX - rect.left) / rect.width) * 100;
-      const py = ((e.clientY - rect.top) / rect.height) * 100;
-      setCursorPos({ x: px, y: py });
-    }
-
-    // Only process GAME LOGIC if dragging (left click held)
-    if (e.buttons !== 1 || showLevelUp || !containerRef.current) return;
-
     const rect = containerRef.current.getBoundingClientRect();
-    const px = ((e.clientX - rect.left) / rect.width) * 100;
-    const py = ((e.clientY - rect.top) / rect.height) * 100;
+    const px = ((clientX - rect.left) / rect.width) * 100;
+    const py = ((clientY - rect.top) / rect.height) * 100;
+    setCursorPos({ x: px, y: py });
+
+    // Only process GAME LOGIC if dragging
+    if (!isDragging || showLevelUp) return;
 
     // 1. BOUNDARY CHECK: Are we "on the line"?
-    // Calculate distance to the NEAREST dot (traced or untraced)
     let minDistanceToShape = 100;
     dots.forEach((dot) => {
       const dist = Math.sqrt(Math.pow(dot.x - px, 2) + Math.pow(dot.y - py, 2));
       if (dist < minDistanceToShape) minDistanceToShape = dist;
     });
 
-    // Threshold for being "out of bounds". slightly larger than catch radius (8)
     const MAX_DEVIATION = 12;
 
     if (minDistanceToShape > MAX_DEVIATION) {
-      // User went off the path!
       if (traced.length > 0) {
-        // Only fail if they had actually started tracing something
         handleFail();
       }
       return;
     }
 
     // 2. TRACING LOGIC
-    // Find closest UNTRACED dot to catch
     let closestId = -1;
     let minDist = 8; // Catch radius
 
@@ -149,6 +139,17 @@ export const TraceShape: React.FC<{
           handleRoundComplete(true);
         }
       }
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    handleMove(e.clientX, e.clientY, e.buttons === 1);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (touch) {
+      handleMove(touch.clientX, touch.clientY, true);
     }
   };
 
@@ -199,7 +200,10 @@ export const TraceShape: React.FC<{
         onMouseMove={handleMouseMove}
         onMouseDown={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        className="relative w-72 h-72 md:w-[32rem] md:h-[32rem] flex-shrink flex items-center justify-center cursor-none group"
+        onTouchMove={handleTouchMove}
+        onTouchStart={handleTouchMove}
+        onTouchEnd={handleMouseLeave}
+        className="relative w-72 h-72 md:w-[32rem] md:h-[32rem] flex-shrink flex items-center justify-center cursor-none group touch-none"
       >
         {/* Connection Path Guide */}
         <svg

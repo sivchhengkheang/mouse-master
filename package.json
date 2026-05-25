@@ -1,18 +1,20 @@
 {
-  "name": "master-mouse",
+  "name": "mouse-master",
   "private": true,
   "version": "1.1.0",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && electron-builder && mkdir -p download && cp release/*.AppImage download",
     "preview": "vite preview",
     "electron:dev": "concurrently -k \"vite\" \"wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .\"",
-    "electron:build": "vite build && electron-builder && mkdir -p download && cp release/*.AppImage download",
-    "electron:start": "electron ."
+    "electron:start": "electron .",
+    "electron:build": "vite build && electron-builder",
+    "build:linux": "vite build && electron-builder --linux AppImage",
+    "build:win": "vite build && electron-builder --win nsis",
+    "build:all": "vite build && electron-builder --linux AppImage --win nsis"
   },
   "main": "electron/main.js",
   "author": "Koompi <info@koompi.com>",
-  "description": "Master Mouse Game",
+  "description": "Mouse Master Game",
   "dependencies": {
     "@google/genai": "^1.35.0",
     "react": "^19.2.3",
@@ -37,7 +39,7 @@
   },
   "build": {
     "appId": "com.koompi.mastermouse",
-    "productName": "master-mouse",
+    "productName": "Mouse Master",
     "directories": {
       "output": "release",
       "buildResources": "build"
@@ -68,7 +70,8 @@
     "win": {
       "target": [
         "nsis"
-      ]
+      ],
+      "icon": "build/icon.png"
     }
   }
 }

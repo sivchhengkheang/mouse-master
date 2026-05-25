@@ -132,7 +132,7 @@ export const en = {
 
     // ToySorter
     toy_sorter: "Toy Sorter",
-    toy_sorter_instruction: "Drag toys to the correct box!",
+    toy_sorter_instruction: "Collect the toys into the box!",
     toy_sorter_success: "Perfect sorting!",
     toy_sorter_box: "Box",
 
@@ -143,12 +143,12 @@ export const en = {
 
     // NumberPop
     number_pop: "Number Pop",
-    number_pop_instruction: "Click on the correct numbers!",
+    number_pop_instruction: "Click on the numbers in order!",
     number_pop_success: "Correct!",
 
     // MagicalColors
     magical_colors: "Magical Colors",
-    magical_colors_instruction: "Right-click to mix colors!",
+    magical_colors_instruction: "Right-click to open the colorful!",
     magical_colors_success: "Great match!",
 
     // TraceShape

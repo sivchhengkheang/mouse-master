@@ -63,11 +63,11 @@ const POOL_ITEMS = [
   },
   {
     emoji: "🦐",
-    name: languageService.t("game.deep_sea_scroll_pull_items.squid"),
+    name: languageService.t("game.deep_sea_scroll_pull_items.lobster"),
   },
   {
     emoji: "🦑",
-    name: languageService.t("game.deep_sea_scroll_pull_items.mermaid"),
+    name: languageService.t("game.deep_sea_scroll_pull_items.squid"),
   },
   {
     emoji: "🧜‍♀️",

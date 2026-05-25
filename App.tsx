@@ -3,7 +3,7 @@ import { GameType, LevelHistory } from './types';
 import { getEncouragingMessage } from './services/geminiService';
 import { audioService } from './services/audioService';
 import { languageService } from './services/languageService';
-import Tutorial from './components/Tutorial';
+// import Tutorial from './components/Tutorial';
 import BalloonPop from './components/games/10game-release/BalloonPop';
 import ToySorter from './components/games/10game-release/ToySorter';
 import MagicalColors from './components/games/10game-release/MagicalColors';
@@ -60,7 +60,7 @@ const SidebarItem = ({ icon, label, active = false, onClick, colorClass = "" }: 
       }`}
   >
     <span className="text-2xl">{icon}</span>
-    <span className="hidden lg:block text-sm">{label}</span>
+    <span className="block md:hidden lg:block text-sm">{label}</span>
   </button>
 );
 
@@ -82,6 +82,7 @@ const App: React.FC = () => {
     (languageService.getLanguage() as "km" | "en") || "km",
   );
   const [lang, setLang] = useState(languageService.getLanguage());
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Force re-render on language change
   const [, setTick] = useState(0);
@@ -258,15 +259,15 @@ const App: React.FC = () => {
   };
 
   const renderGame = () => {
-    if (showTutorial) return (
-      <Tutorial
-        onComplete={() => {
-          setShowTutorial(false);
-          localStorage.setItem('mouse_master_tutorial_v2', 'true');
-        }}
-        onSkip={() => setShowTutorial(false)}
-      />
-    );
+    // if (showTutorial) return (
+    //   <Tutorial
+    //     onComplete={() => {
+    //       setShowTutorial(false);
+    //       localStorage.setItem('mouse_master_tutorial_v2', 'true');
+    //     }}
+    //     onSkip={() => setShowTutorial(false)}
+    //   />
+    // );
 
     if (loading) return (
       <div className="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300">
@@ -343,21 +344,34 @@ const App: React.FC = () => {
 
   return (
     <div className={`flex h-screen bg-white overflow-hidden selection:bg-[#84d8ff] ${languageService.getLanguage() === 'km' ? 'font-km' : 'font-en'}`}>
-      <aside className="hidden md:flex w-20 lg:w-64 border-r-2 border-[#e5e5e5] flex-col p-4 shrink-0 overflow-y-auto">
-        <div className="mb-10 px-4">
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      <aside className={`${isSidebarOpen ? 'flex absolute inset-y-0 left-0 z-50 bg-white shadow-2xl animate-in slide-in-from-left duration-300' : 'hidden md:flex'} w-64 md:w-20 lg:w-64 border-r-2 border-[#e5e5e5] flex-col p-4 shrink-0 overflow-y-auto`}>
+        <div className="mb-10 px-4 flex justify-between items-center">
           <h1
             onClick={() => window.location.reload()}
             className="title-font text-[#58cc02] text-2xl lg:text-3xl tracking-tighter hover:scale-105 transition-transform cursor-pointer"
           >
             {languageService.t('app_title')}
           </h1>
+          {isSidebarOpen && (
+            <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-gray-400 hover:text-gray-600 p-1">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          )}
         </div>
         <nav className="flex flex-col gap-2 flex-1">
-          <SidebarItem icon="🏠" label={languageService.t('sidebar.home')} active={currentLevel === 0 && !showAccount && !showRanking && !showAbout} onClick={() => { setCurrentLevel(0); setShowAccount(false); setShowRanking(false); setShowAbout(false); }} />
-          <SidebarItem icon="📜" label={languageService.t('sidebar.history')} active={showRanking} onClick={() => { setShowRanking(true); setShowAccount(false); setShowAbout(false); }} />
-          <SidebarItem icon="👤" label={languageService.t('sidebar.account')} active={showAccount} onClick={() => { setShowAccount(true); setShowRanking(false); setShowAbout(false); }} />
-          <SidebarItem icon="ℹ️" label={languageService.t('sidebar.about')} active={showAbout} onClick={() => { setShowAbout(true); setShowAccount(false); setShowRanking(false); }} />
-          <SidebarItem icon="⚙️" label={languageService.t('sidebar.settings')} onClick={() => setShowResetConfirm(true)} />
+          <SidebarItem icon="🏠" label={languageService.t('sidebar.home')} active={currentLevel === 0 && !showAccount && !showRanking && !showAbout} onClick={() => { setCurrentLevel(0); setShowAccount(false); setShowRanking(false); setShowAbout(false); setIsSidebarOpen(false); }} />
+          <SidebarItem icon="📜" label={languageService.t('sidebar.history')} active={showRanking} onClick={() => { setShowRanking(true); setShowAccount(false); setShowAbout(false); setIsSidebarOpen(false); }} />
+          <SidebarItem icon="👤" label={languageService.t('sidebar.account')} active={showAccount} onClick={() => { setShowAccount(true); setShowRanking(false); setShowAbout(false); setIsSidebarOpen(false); }} />
+          <SidebarItem icon="ℹ️" label={languageService.t('sidebar.about')} active={showAbout} onClick={() => { setShowAbout(true); setShowAccount(false); setShowRanking(false); setIsSidebarOpen(false); }} />
+          <SidebarItem icon="⚙️" label={languageService.t('sidebar.settings')} onClick={() => { setShowResetConfirm(true); setIsSidebarOpen(false); }} />
           {/* Language Switch Button */}
           {/* <button
             onClick={() => languageService.toggleLanguage()}
@@ -371,7 +385,7 @@ const App: React.FC = () => {
             className="w-full flex items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase transition-all duration-200 border-2 bg-transparent border-transparent text-[#777] hover:bg-[#f7f7f7] group active:scale-95"
           >
             <span className="text-2xl transition-transform group-hover:scale-110">{lang === 'km' ? '🇰🇭' : '🇺🇸'}</span>
-            <div className="hidden lg:flex items-center gap-3">
+            <div className="flex md:hidden lg:flex items-center gap-3">
               <span className="text-sm tracking-wider">{lang === 'km' ? 'ភាសាខ្មែរ' : 'ENGLISH'}</span>
               <div className="w-[1px] h-3 bg-slate-300" />
               <span className="text-[10px] opacity-60 font-black">{lang === 'km' ? 'KM' : 'EN'}</span>
@@ -383,60 +397,61 @@ const App: React.FC = () => {
             <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm border-2 border-slate-200 group-hover:scale-110 transition-transform overflow-hidden bg-slate-700">
               <img src="./koompi.png" alt="Koompi" className="w-6 h-6 object-contain filter brightness-0 invert" />
             </div>
-            <div className="hidden lg:block overflow-hidden">
+            <div className="block md:hidden lg:block overflow-hidden">
               <p className="text-[15px] font-black text-gray-600 uppercase tracking-widest leading-none border-l-2 p-2 border-[#C0C0C0]">KOOMPI-APP</p>
             </div>
           </div>
         </div>
       </aside>
 
-      <main ref={scrollContainerRef} className="flex-1 overflow-y-auto custom-scrollbar bg-white flex flex-col items-center scroll-smooth">
+      <main ref={scrollContainerRef} className="flex-1 overflow-y-auto custom-scrollbar bg-white flex flex-col items-center scroll-smooth relative">
+        {/* Mobile Header */}
+        {currentLevel === 0 && (
+          <div className="md:hidden w-full flex items-center justify-between p-4 border-b-2 border-[#e5e5e5] bg-white sticky top-0 z-30 shadow-sm">
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="p-2 bg-[#f7f7f7] rounded-xl shadow-sm border-2 border-[#e5e5e5] text-gray-600 active:scale-95 transition-transform"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <h1 className="title-font text-[#58cc02] text-xl tracking-tighter">
+              {languageService.t('app_title')}
+            </h1>
+            <div className="w-10"></div>
+          </div>
+        )}
+
         {currentLevel === 0 ? (
-          <div className="w-full max-w-2xl py-12 px-4 animate-in fade-in duration-700">
+          <div className="w-full max-w-2xl py-6 md:py-12 px-4 animate-in fade-in duration-700">
             {CHAPTER_THEMES.map((chapter, chapterIdx) => (
-              <section key={chapterIdx} className="mb-20">
-                <div className={`sticky top-6 z-40 w-full rounded-[1.5rem] p-4 mb-8 text-white shadow-xl transition-all duration-300 ${chapter.color} border-b-6 ${chapter.border} overflow-hidden group`}>
-                  <div className="relative flex items-center gap-6 z-20">
+              <section key={chapterIdx} className="mb-20 ">
+                <div className={`hidden md:block sticky top-4 md:top-6 z-40 w-full rounded-2xl md:rounded-[1.5rem] p-3 md:p-4 mb-8 text-white shadow-xl transition-all duration-300 ${chapter.color} border-b-[4px] md:border-b-6 ${chapter.border} overflow-hidden group`}>
+                  <div className="relative flex items-center gap-3 md:gap-6 z-20">
                     {/* Left: Chapter & Title */}
-                    {/* <div className="shrink-0 flex flex-col justify-center border-r-2 border-white/20 pr-6 min-w-[120px]">
-                      <h3 className="font-black text-[10px] uppercase tracking-[0.3em] opacity-80 leading-none mb-1">
+                    <div className="shrink-0 flex flex-col justify-center md:border-r-2 border-white/20 pr-2 md:pr-6 min-w-[100px] md:min-w-[120px]">
+                      {/* <h3 className="font-black text-[8px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.3em] opacity-80 leading-none mb-1 drop-shadow-sm">
                         {languageService.t('chapter.chapter_prefix')} {chapterIdx + 1}
-                      </h3>
-                      <h2 className="title-font text-3xl font-black leading-none tracking-tighter drop-shadow-sm">
+                      </h3> */}
+                      <h2 className="title-font text-xl sm:text-2xl md:text-3xl font-black leading-none tracking-tighter drop-shadow-md">
                         {languageService.t(chapter.nameKey)}
                       </h2>
-                    </div> */}
-
-                    {/* Middle: Content */}
-                    <div className="flex-1 hidden md:grid grid-cols-2 gap-3 items-center">
-                      <div className="bg-black/10 rounded-xl p-3 border border-white/5 h-full flex flex-col justify-center">
-                        <h4 className="text-[9px] font-black uppercase tracking-[0.1em] opacity-60 mb-0.5">{languageService.t(chapter.description)}</h4>
-                        <p className="text-[12px] font-bold leading-tight text-white drop-shadow-sm">
-                          {languageService.t(chapter.descriptionKey)}
-                        </p>
-                      </div>
-
-                      <div className="bg-black/20 rounded-xl p-3 border border-white/10 h-full flex flex-col justify-center">
-                        <h4 className="text-[9px] font-black uppercase tracking-[0.1em] opacity-60 mb-0.5">{languageService.t(chapter.how_to_play)}</h4>
-                        {/* <div className="flex items-center gap-2"> */}
-                        <p className="text-[12px] font-bold leading-tight text-white drop-shadow-sm">
-                          {languageService.t(chapter.guideKey)}
-                        </p>
-                        {/* </div> */}
-                      </div>
+                      {/* <span className="text-6xl">🐭</span> */}
                     </div>
 
-                    {/* Mobile Content (Visible only on small screens) */}
-                    <div className="flex-1 md:hidden overflow-hidden">
-                      <p className="text-[12px] font-black italic leading-tight truncate">
-                        {languageService.t(chapter.guideKey)}
+                    {/* Middle: Content (Hidden on small screens) */}
+                    <div className="flex-1 lex flex-col justify-center">
+                      <p className="text-xs md:text-sm font-bold leading-relaxed text-white drop-shadow-sm opacity-95">
+                        {languageService.t(chapter.descriptionKey)}
                       </p>
                     </div>
 
                     {/* Right: Icon */}
-                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-4xl md:text-5xl shadow-lg group-hover:rotate-12 transition-transform duration-300 grow-0 shrink-0 self-center">
+                    {/* <div className="ml-auto w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-2xl md:text-4xl shadow-lg group-hover:rotate-12 transition-transform duration-300 grow-0 shrink-0 self-center">
                       {chapterIdx === 0 ? '🖱️' : '🐭'}
                     </div>
+                    */}
                   </div>
                 </div>
 
@@ -566,7 +581,7 @@ const App: React.FC = () => {
                 style={{ width: `${(completedLevels.size / TOTAL_LEVELS) * 100}%` }}
               />
             </div>
-            <p className="text-[10px] font-bold text-[#afafaf] italic text-center">{languageService.t('chapter.bravo')}</p>
+            {/* <p className="text-[10px] font-bold text-[#afafaf] italic text-center">{languageService.t('chapter.bravo')}</p> */}
           </div>
 
           {showLeaderboard && (

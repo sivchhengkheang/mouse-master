@@ -41,7 +41,7 @@ const MagicalColors: React.FC<MagicalColorsProps> = ({
     initRound(round);
   }, [round, count]);
 
-  const handleRightClick = (e: React.MouseEvent, id: number) => {
+  const handleRightClick = (e: React.MouseEvent | React.TouchEvent, id: number) => {
     e.preventDefault();
     if (!colored.includes(id) && !showLevelUp) {
       audioService.playCollect();
@@ -90,6 +90,7 @@ const MagicalColors: React.FC<MagicalColorsProps> = ({
           <div
             key={`${round}-${shape.id}`}
             onContextMenu={(e) => handleRightClick(e, shape.id)}
+            onTouchStart={(e) => handleRightClick(e, shape.id)}
             className={`absolute w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 flex items-center justify-center text-3xl sm:text-4xl md:text-5xl rounded-2xl sm:rounded-3xl md:rounded-full transition-all duration-500 cursor-help border-2 sm:border-3 md:border-4 ${
               colored.includes(shape.id)
                 ? "bg-white border-yellow-400 shadow-lg md:shadow-xl scale-110 rotate-12"

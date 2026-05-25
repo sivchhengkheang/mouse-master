@@ -47,27 +47,45 @@ export const StarCatcher: React.FC<{
     return unsubscribe;
   }, []);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleStart = (clientX: number, clientY: number) => {
     if (showLevelUp) return;
     audioService.playHover();
     const rect = containerRef.current!.getBoundingClientRect();
     setSelection({
-      x1: e.clientX - rect.left,
-      y1: e.clientY - rect.top,
-      x2: e.clientX - rect.left,
-      y2: e.clientY - rect.top,
+      x1: clientX - rect.left,
+      y1: clientY - rect.top,
+      x2: clientX - rect.left,
+      y2: clientY - rect.top,
     });
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseDown = (e: React.MouseEvent) => {
+    handleStart(e.clientX, e.clientY);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (touch) handleStart(touch.clientX, touch.clientY);
+  };
+
+  const handleMove = (clientX: number, clientY: number) => {
     if (selection && !showLevelUp) {
       const rect = containerRef.current!.getBoundingClientRect();
       setSelection({
         ...selection,
-        x2: e.clientX - rect.left,
-        y2: e.clientY - rect.top,
+        x2: clientX - rect.left,
+        y2: clientY - rect.top,
       });
     }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    handleMove(e.clientX, e.clientY);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (touch) handleMove(touch.clientX, touch.clientY);
   };
 
   const handleMouseUp = () => {
@@ -133,7 +151,10 @@ export const StarCatcher: React.FC<{
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
-      className="relative w-full h-full bg-indigo-950 overflow-hidden cursor-crosshair select-none"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleMouseUp}
+      className="relative w-full h-full bg-indigo-950 overflow-hidden cursor-crosshair select-none touch-none"
     >
       <GameHUD
         round={round}

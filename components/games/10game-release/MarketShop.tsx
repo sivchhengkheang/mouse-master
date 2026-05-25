@@ -127,6 +127,7 @@ export const MarketShop: React.FC<{
   );
   const containerRef = useRef<HTMLDivElement>(null);
   const cabinetRef = useRef<HTMLDivElement>(null);
+  const basketRef = useRef<HTMLDivElement>(null);
 
   const currentCount = count + (round - 1);
 
@@ -260,6 +261,17 @@ export const MarketShop: React.FC<{
     });
   };
 
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (dragging === null || !containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const touch = e.touches[0];
+
+    setDragPos({
+      x: ((touch.clientX - rect.left) / rect.width) * 100,
+      y: ((touch.clientY - rect.top) / rect.height) * 100,
+    });
+  };
+
   const handleMouseUp = () => {
     if (dragging === null) return;
 
@@ -269,8 +281,23 @@ export const MarketShop: React.FC<{
       return;
     }
 
-    // Check if dropped in basket area (left side, bottom)
-    const inBasket = dragPos.x < 25 && dragPos.y > 70;
+    // Dynamically calculate drop zone based on actual basket position
+    let inBasket = false;
+    if (basketRef.current && containerRef.current) {
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const mouseX = (dragPos.x / 100) * containerRect.width + containerRect.left;
+      const mouseY = (dragPos.y / 100) * containerRect.height + containerRect.top;
+      
+      const basketRect = basketRef.current.getBoundingClientRect();
+      // Add a generous 20px padding to the hit zone for easier dropping
+      inBasket = 
+        mouseX >= basketRect.left - 20 && 
+        mouseX <= basketRect.right + 20 &&
+        mouseY >= basketRect.top - 20 &&
+        mouseY <= basketRect.bottom + 20;
+    } else {
+      inBasket = dragPos.x < 25 && dragPos.y > 70; // Fallback
+    }
 
     if (inBasket && targetItems.includes(item.emoji) && !item.inBasket) {
       audioService.playPop();
@@ -333,9 +360,11 @@ export const MarketShop: React.FC<{
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full overflow-hidden select-none font-sans bg-gray-50"
+      className="relative w-full h-full overflow-hidden select-none font-sans bg-gray-50 touch-none"
       onMouseMove={handleMouseMove}
+      onTouchMove={handleTouchMove}
       onMouseUp={handleMouseUp}
+      onTouchEnd={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
       {/* Background Image */}
@@ -349,7 +378,7 @@ export const MarketShop: React.FC<{
       </div>
 
       {/* Header / Awning - Responsive */}
-      <div className="absolute top-0 left-0 right-0 h-auto sm:h-auto z-10 flex items-center px-2 sm:px-4 md:px-8 py-2 sm:py-3 md:py-4 z-1">
+      {/* <div className="absolute top-0 left-0 right-0 h-auto sm:h-auto z-10 flex items-center px-2 sm:px-4 md:px-8 py-2 sm:py-3 md:py-4 z-1">
         <div className="flex-1 flex items-center gap-2 sm:gap-3 md:gap-5">
           <div className="text-3xl sm:text-4xl md:text-5xl icon-3d">🏪</div>
           <div className="space-y-0.5 sm:space-y-1 md:space-y-2">
@@ -366,7 +395,7 @@ export const MarketShop: React.FC<{
             </p>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Game HUD - Positioned at root level */}
       <GameHUD
@@ -389,29 +418,70 @@ export const MarketShop: React.FC<{
         {/* LEFT PANEL: Shopping List + Basket */}
         <div
           className={`
-          flex flex-col gap-2 sm:gap-3 
-          ${isSmallMobile ? "w-full h-40 sm:h-48" : isMobile ? "w-full lg:w-1/4 h-48 sm:h-56" : isTablet ? "w-1/4 flex-1 min-h-0" : "w-1/5 flex-1 min-h-0"}
           relative z-20 pointer-events-none
+          ${isMobile
+            ? "w-full flex-shrink-0 flex flex-row gap-2 h-28"
+            : isTablet
+              ? "w-1/4 flex-1 min-h-0 flex flex-col gap-2 sm:gap-3"
+              : "w-1/5 flex-1 min-h-0 flex flex-col gap-2 sm:gap-3"
+          }
         `}
         >
-          {/* Language Switch Button */}
-          <button
-            onClick={() => languageService.toggleLanguage()}
-            className="pointer-events-auto self-start ml-2 sm:ml-3 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold rounded-full text-xs sm:text-sm shadow-lg transition-all duration-200 hover:scale-110 active:scale-95 flex-shrink-0"
-            title={language === "km" ? "Switch to English" : "ប្តូរទៅខ្មែរ"}
-          >
-            {language === "km" ? "🇬🇧 EN" : "🇰🇭 KM"}
-          </button>
-
           {/* Shopping List */}
-          {!isSmallMobile && (
-            <div className="flex-1 min-h-0 bg-yellow-50 rounded-lg sm:rounded-xl md:rounded-2xl shadow-lg sm:shadow-xl md:shadow-2xl border-2 sm:border-2 md:border-3 border-gray-300 relative overflow-hidden transform -rotate-1 pointer-events-auto flex flex-col">
-              <div className="h-7 sm:h-8 md:h-10 bg-gradient-to-r from-gray-800 to-gray-700 flex items-center justify-center relative flex-shrink-0 shadow-md">
-                <span className="text-white font-black tracking-widest text-[9px] sm:text-[10px] md:text-sm drop-shadow-lg">
-                  📝 {languageService.t("game.list")}
-                </span>
-              </div>
-              <div className="flex-1 overflow-y-auto custom-scrollbar bg-[linear-gradient(transparent_16px,#e5e7eb_17px)] sm:bg-[linear-gradient(transparent_18px,#e5e7eb_19px)] md:bg-[linear-gradient(transparent_20px,#e5e7eb_21px)] bg-[size:100%_16px] sm:bg-[size:100%_18px] md:bg-[size:100%_21px]">
+          <div className={`
+            order-2 md:order-1
+            bg-yellow-50 rounded-lg shadow-lg border-2 border-gray-300 relative overflow-hidden pointer-events-auto flex
+            ${isMobile
+              ? "flex-1 h-full flex-col"
+              : "flex-col flex-1 min-h-0 transform -rotate-1"
+            }
+          `}>
+            {/* Header */}
+            <div className={`
+              bg-gradient-to-r from-gray-800 to-gray-700 flex items-center justify-center flex-shrink-0 shadow-md
+              ${isMobile ? "h-6 w-full" : "h-7 sm:h-8 md:h-10 w-full"}
+            `}>
+              <span className={`text-white font-black tracking-widest drop-shadow-lg
+                ${isMobile ? "text-[10px]" : "text-[9px] sm:text-[10px] md:text-sm"}
+              `}>
+                📝 {languageService.t("game.list")}
+              </span>
+            </div>
+
+            {/* Items */}
+            <div className={`
+              flex-1 custom-scrollbar
+              ${isMobile
+                ? "overflow-x-auto overflow-y-hidden flex flex-row items-center gap-2 px-2"
+                : "overflow-y-auto bg-[linear-gradient(transparent_16px,#e5e7eb_17px)] sm:bg-[linear-gradient(transparent_18px,#e5e7eb_19px)] md:bg-[linear-gradient(transparent_20px,#e5e7eb_21px)] bg-[size:100%_16px] sm:bg-[size:100%_18px] md:bg-[size:100%_21px]"
+              }
+            `}>
+              {isMobile ? (
+                // Mobile: horizontal scrollable chips
+                <div className="flex flex-row gap-2 px-1 py-2 flex-nowrap">
+                  {targetItems.map((emoji, i) => {
+                    const isCollected = items.find(
+                      (item) => item.emoji === emoji && item.inBasket,
+                    );
+                    return (
+                      <div
+                        key={i}
+                        className={`flex-shrink-0 flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg border-2 transition-all
+                          ${isCollected
+                            ? "border-green-400 bg-green-50 opacity-60"
+                            : "border-gray-300 bg-white"
+                          }`}
+                      >
+                        <span className={`text-xl ${isCollected ? "grayscale opacity-50" : ""}`}>{emoji}</span>
+                        {isCollected && (
+                          <span className="text-green-500 font-bold text-[10px]">✓</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                // Desktop/Tablet: vertical list
                 <div className="p-1 sm:p-2 md:p-3 space-y-1 sm:space-y-2 md:space-y-2.5 font-handwriting text-[8px] sm:text-xs md:text-sm text-slate-800 pt-0.5 sm:pt-1">
                   {targetItems.map((emoji, i) => {
                     const isCollected = items.find(
@@ -423,11 +493,10 @@ export const MarketShop: React.FC<{
                         className="flex items-center gap-1 sm:gap-2 md:gap-2.5 h-[17px] sm:h-[18px] md:h-[20px]"
                       >
                         <div
-                          className={`w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 border-2 rounded flex-shrink-0 flex items-center justify-center transition-all ${
-                            isCollected
-                              ? "border-green-500 bg-green-500 shadow-lg shadow-green-400/60 scale-110"
-                              : "border-gray-400 bg-white hover:border-gray-500"
-                          }`}
+                          className={`w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 border-2 rounded flex-shrink-0 flex items-center justify-center transition-all ${isCollected
+                            ? "border-green-500 bg-green-500 shadow-lg shadow-green-400/60 scale-110"
+                            : "border-gray-400 bg-white hover:border-gray-500"
+                            }`}
                         >
                           {isCollected && (
                             <span className="font-bold text-white text-[6px] sm:text-[7px]">
@@ -449,23 +518,32 @@ export const MarketShop: React.FC<{
                     );
                   })}
                 </div>
-              </div>
-              <div className="absolute top-9 md:top-10 bottom-0 left-6 w-px bg-red-300 pointer-events-none"></div>
+              )}
             </div>
-          )}
+            {!isMobile && (
+              <div className="absolute top-9 md:top-10 bottom-0 left-6 w-px bg-red-300 pointer-events-none"></div>
+            )}
+          </div>
 
-          {/* Basket */}
+          {/* Basket - on mobile: left side, on desktop: bottom */}
           <div
-            className={`${isSmallMobile ? "h-20 sm:h-24" : isMobile ? "h-20 sm:h-24" : "h-24 md:h-32"} relative flex-shrink-0 flex flex-col items-center justify-end gap-1 sm:gap-2 bg-gradient-to-br from-amber-100/30 to-orange-100/20 rounded-lg sm:rounded-xl p-2 sm:p-3 border-2 border-amber-200/50 shadow-lg pointer-events-auto`}
+            ref={basketRef}
+            className={`
+              order-1 md:order-2
+              relative flex-shrink-0 flex flex-col items-center justify-end gap-1
+              bg-gradient-to-br from-amber-100/30 to-orange-100/20
+              rounded-lg sm:rounded-xl p-2 border-2 border-amber-200/50 shadow-lg pointer-events-auto
+              ${isMobile ? "h-full w-20 sm:w-24 justify-center" : "h-24 md:h-32"}
+            `}
           >
-            <div className="text-4xl sm:text-5xl md:text-6xl drop-shadow-xl">
+            <div className={`${isMobile ? "text-3xl" : "text-4xl sm:text-5xl md:text-6xl"} drop-shadow-xl`}>
               🧺
             </div>
-            <div className="flex flex-col items-center gap-0.5 sm:gap-1">
-              <div className="text-[10px] sm:text-xs md:text-sm font-bold text-amber-900 drop-shadow">
+            <div className="flex flex-col items-center gap-0.5">
+              <div className="text-[10px] sm:text-xs font-bold text-amber-900 drop-shadow">
                 {collected}/{currentCount}
               </div>
-              <div className="text-[7px] sm:text-[8px] md:text-xs font-bold text-white bg-gradient-to-r from-green-600 to-green-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full whitespace-nowrap shadow-md">
+              <div className="text-[7px] sm:text-[8px] font-bold text-white bg-gradient-to-r from-green-600 to-green-700 px-2 py-0.5 rounded-full whitespace-nowrap shadow-md">
                 {languageService.t("game.basket")}
               </div>
             </div>
@@ -557,15 +635,32 @@ export const MarketShop: React.FC<{
                           {categoryItems.map((item) => (
                             <div
                               key={item.id}
-                              className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 ${
-                                item.inBasket
-                                  ? "bg-slate-800/50 opacity-40 cursor-not-allowed"
-                                  : "bg-slate-700 cursor-grab active:cursor-grabbing hover:bg-slate-600 hover:scale-105"
-                              } ${dragging === item.id ? "scale-125 z-50 drop-shadow-2xl bg-slate-600" : "z-10"}`}
+                              className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 ${item.inBasket
+                                ? "bg-slate-800/50 opacity-40 cursor-not-allowed"
+                                : "bg-slate-700 cursor-grab active:cursor-grabbing hover:bg-slate-600 hover:scale-105"
+                                } ${dragging === item.id ? "scale-125 z-50 drop-shadow-2xl bg-slate-600" : "z-10"}`}
                               onMouseDown={(e) => {
-                                if (item.inBasket) return; // Don't allow dragging collected items
+                                if (item.inBasket || !containerRef.current) return; // Don't allow dragging collected items
                                 e.preventDefault();
                                 setDragging(item.id);
+                                const rect = containerRef.current.getBoundingClientRect();
+                                setDragPos({
+                                  x: ((e.clientX - rect.left) / rect.width) * 100,
+                                  y: ((e.clientY - rect.top) / rect.height) * 100,
+                                });
+                                audioService.playHover();
+                              }}
+                              onTouchStart={(e) => {
+                                if (item.inBasket || !containerRef.current) return;
+                                // Can't preventDefault here if using passive listeners, but React's synthetic events default to non-passive for touch events.
+                                // touch-none on container handles the scroll prevention.
+                                setDragging(item.id);
+                                const rect = containerRef.current.getBoundingClientRect();
+                                const touch = e.touches[0];
+                                setDragPos({
+                                  x: ((touch.clientX - rect.left) / rect.width) * 100,
+                                  y: ((touch.clientY - rect.top) / rect.height) * 100,
+                                });
                                 audioService.playHover();
                               }}
                               style={{
@@ -583,15 +678,13 @@ export const MarketShop: React.FC<{
                               </div>
                               {/* Emoji */}
                               <div
-                                className={`${
-                                  isSmallMobile
-                                    ? "text-2xl"
-                                    : isMobile
-                                      ? "text-3xl"
-                                      : "text-4xl md:text-5xl"
-                                } drop-shadow-lg filter select-none ${
-                                  item.inBasket ? "grayscale opacity-60" : ""
-                                }`}
+                                className={`${isSmallMobile
+                                  ? "text-2xl"
+                                  : isMobile
+                                    ? "text-3xl"
+                                    : "text-4xl md:text-5xl"
+                                  } drop-shadow-lg filter select-none ${item.inBasket ? "grayscale opacity-60" : ""
+                                  }`}
                               >
                                 {item.emoji}
                               </div>
