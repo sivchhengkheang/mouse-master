@@ -4,6 +4,6 @@ Comment=Master Mouse Game
 Exec="/opt/Master Mouse/master-mouse" %U
 Terminal=false
 Type=Application
-Icon=mouse-master
+Icon=master-mouse
 StartupWMClass=Master Mouse
 Categories=Game;Education;

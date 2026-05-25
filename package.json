@@ -1,5 +1,5 @@
 {
-  "name": "mouse-master",
+  "name": "master-mouse",
   "private": true,
   "version": "1.1.0",
   "scripts": {
@@ -14,7 +14,7 @@
   },
   "main": "electron/main.js",
   "author": "Koompi <info@koompi.com>",
-  "description": "Mouse Master Game",
+  "description": "Master Mouse Game",
   "dependencies": {
     "@google/genai": "^1.35.0",
     "react": "^19.2.3",
@@ -39,7 +39,7 @@
   },
   "build": {
     "appId": "com.koompi.mastermouse",
-    "productName": "Mouse Master",
+    "productName": "Master Mouse",
     "directories": {
       "output": "release",
       "buildResources": "build"

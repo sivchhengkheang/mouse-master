@@ -5,8 +5,8 @@ const isDev = process.env.NODE_ENV === 'development';
 
 function createWindow() {
     const iconPath = isDev
-        ? path.join(__dirname, '../public/mouse-master-logo.png')
-        : path.join(__dirname, '../dist/mouse-master-logo.png');
+        ? path.join(__dirname, '../public/master-mouse-logo.png')
+        : path.join(__dirname, '../dist/master-mouse-logo.png');
 
     const mainWindow = new BrowserWindow({
         width: 1280,

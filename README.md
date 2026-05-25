@@ -1,12 +1,8 @@
 
-# 🎮 Master Mouse Adventure
+# 🎮 Master Mouse
 
 <div align="center">
-  <img src="public/cover.png" alt="Master Mouse Adventure Cover" width="100%" />
-</div>
-
-<div align="center">
-  <img src="public/pwa-512x512.png" alt="Master Mouse Adventure Logo" width="128" />
+  <img src="public/master-mouse.png" alt="Master Mouse Adventure Logo" width="128" />
   <p><em>An interactive educational journey to master computer mouse skills, inspired by the spirit of Cambodia.</em></p>
 </div>
 
@@ -64,7 +60,7 @@ The game is fully localized to support:
 
 1.  **Clone the repository**
     ```bash
-    git clone https://github.com/sivchheng16/master-mouse.git
+    git clone https://github.com/sivchhengkheang/master-mouse.git
     cd master-mouse
     ```
 
